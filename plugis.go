@@ -13,7 +13,7 @@ import (
 	"github.com/telemac/goutils/net"
 	"github.com/telemac/goutils/task"
 
-	"github.com/go-viper/mapstructure/v2"
+	//"github.com/go-viper/mapstructure/v2"
 	"github.com/nats-io/nats.go"
 	"github.com/synadia-io/orbit.go/natsext"
 )
@@ -182,7 +182,7 @@ func isRunningInDockerContainer() bool {
 }
 
 // NewServiceMetadata creates and fills a ServiceMetadata structure
-func NewServiceMetadata(prefix string, startedAt time.Time) (Metadata, error) {
+func NewServiceMetadata(prefix string, startedAt time.Time) (*ServiceMetadata, error) {
 	var err error
 	var meta ServiceMetadata
 	meta.Prefix = prefix
@@ -201,8 +201,5 @@ func NewServiceMetadata(prefix string, startedAt time.Time) (Metadata, error) {
 		return nil, err
 	}
 
-	// Convert struct to map using mapstructure
-	var result Metadata
-	err = mapstructure.Decode(meta, &result)
-	return result, err
+	return &meta, nil
 }

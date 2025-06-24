@@ -1,13 +1,13 @@
-# plugis3-service
+# plugisservice
 
-plugis3-service is a package to write plugis3 services in Go.
+plugisservice is a package to write plugis3 services in Go.
 
 A Plugis3 service is a NATS micro service with some specific properties that must implement the `PlugisServiceIntf` interface.
 
 ## NATS Micro PlugisServiceIntf Integration
 
 For NATS services, see:
-- [Building a PlugisServiceIntf](https://docs.nats.io/using-nats/nex/getting-started/building-service)
+- [Building a Service](https://docs.nats.io/using-nats/nex/getting-started/building-service)
 - [NATS micro on Github](https://github.com/nats-io/nats.go/tree/main/micro)
 
 # Files
