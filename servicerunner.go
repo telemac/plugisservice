@@ -11,12 +11,13 @@ import (
 
 // ServiceRunner is a struct that runs one or more services.
 type ServiceRunner struct {
-	wg  sync.WaitGroup
-	log *slog.Logger
-	nc  *nats.Conn
+	wg     sync.WaitGroup
+	log    *slog.Logger
+	nc     *nats.Conn
+	prefix string
 }
 
-func NewServiceRunner(nc *nats.Conn, log *slog.Logger) *ServiceRunner {
+func NewServiceRunner(nc *nats.Conn, log *slog.Logger, prefix string) *ServiceRunner {
 	if log == nil {
 		log = slog.Default()
 	}
@@ -24,9 +25,11 @@ func NewServiceRunner(nc *nats.Conn, log *slog.Logger) *ServiceRunner {
 		log.Error("failed to connect to nats")
 		return nil
 	}
+	// TODO : handle empty prefix
 	return &ServiceRunner{
-		nc:  nc,
-		log: log,
+		nc:     nc,
+		log:    log,
+		prefix: prefix,
 	}
 }
 
@@ -37,6 +40,8 @@ func (sr *ServiceRunner) Start(ctx context.Context, svc PlugisServiceIntf) {
 		defer sr.wg.Done()
 		svc.SetLogger(sr.log)
 		svc.SetNats(sr.nc)
+		// TODO : handle empty prefix
+		svc.SetPrefix(sr.prefix)
 		serviceType := fmt.Sprintf("%T", svc)
 		err := svc.Run(ctx)
 		if err != nil {

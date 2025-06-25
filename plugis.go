@@ -13,7 +13,6 @@ import (
 	"github.com/telemac/goutils/net"
 	"github.com/telemac/goutils/task"
 
-	//"github.com/go-viper/mapstructure/v2"
 	"github.com/nats-io/nats.go"
 	"github.com/synadia-io/orbit.go/natsext"
 )
@@ -26,6 +25,7 @@ var _ PlugisIntf = (*Plugis)(nil)
 type Plugis struct {
 	logger *slog.Logger
 	nc     *nats.Conn
+	prefix string
 }
 
 var (
@@ -78,7 +78,12 @@ func (plugis *Plugis) Publish(topic string, payload []byte) error {
 
 // Prefix returns the prefix for the Plugis instance.
 func (plugis *Plugis) Prefix() string {
-	return "integrator.customer.location"
+	return plugis.prefix
+}
+
+// SetPrefix sets the prefix for the Plugis instance.
+func (plugis *Plugis) SetPrefix(prefix string) {
+	plugis.prefix = prefix
 }
 
 // Request sends a request to the nats connection.
@@ -191,7 +196,7 @@ func NewServiceMetadata(prefix string, startedAt time.Time) (*ServiceMetadata, e
 		meta.Platform += " (docker)"
 	}
 
-	meta.StartedAt = startedAt.String()
+	meta.StartedAt = startedAt.Format(time.RFC3339)
 	meta.Hostname, err = os.Hostname()
 	if err != nil {
 		return nil, err
@@ -202,4 +207,25 @@ func NewServiceMetadata(prefix string, startedAt time.Time) (*ServiceMetadata, e
 	}
 
 	return &meta, nil
+}
+
+//func (smd *ServiceMetadata) Meta() Metadata {
+//	var meta Metadata
+//	err := mapstructure.Decode(smd, &meta)
+//	if err != nil {
+//		return Metadata{}
+//	}
+//	return meta
+//}
+
+func (smd *ServiceMetadata) Meta() Metadata {
+	data, err := json.Marshal(smd)
+	if err != nil {
+		return Metadata{}
+	}
+	var meta Metadata
+	if err := json.Unmarshal(data, &meta); err != nil {
+		return Metadata{}
+	}
+	return meta
 }

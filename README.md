@@ -19,3 +19,11 @@ The `plugis.go` file defines the `PlugisIntf` interface, which specifies the fun
 The `example/echoService/echoService.go` file is a minimal service implementation sample.
 
 The `example/echoService/cmd/main.go` file is a sample of ServiceRunner usage.
+
+# How to declare a service
+
+```go
+
+
+
+```

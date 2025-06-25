@@ -72,23 +72,25 @@ func (svc *EchoService) Run(ctx context.Context) error {
 	defer func() {
 		service.Stop()
 	}()
+	/*
+		pingEndpoint := nats_service.EndpointConfig{
+			Name: "ping",
+			Handler: func(ctx context.Context, request micro.Request) (any, error) {
+				data := request.Data()
+				_ = data
+				return "ping: " + string(data), err
+			},
+			MaxConcurrency: 10,
+			RequestTimeout: 2 * time.Second,
+			Metadata: map[string]string{
+				"description": "ping",
+				"version":     "0.0.1",
+			},
+		}
 
-	echoEndpoint := nats_service.EndpointConfig{
-		Name: "ping",
-		Handler: func(ctx context.Context, request micro.Request) (any, error) {
-			data := request.Data()
-			_ = data
-			return "ping: " + string(data), err
-		},
-		MaxConcurrency: 10,
-		RequestTimeout: 2 * time.Second,
-		Metadata: map[string]string{
-			"description": "ping",
-			"version":     "0.0.1",
-		},
-	}
+	*/
 
-	err = service.AddEndpoint(ctx, echoEndpoint)
+	err = service.AddEndpoint(ctx, pingEndpoint)
 	if err != nil {
 		return err
 	}
@@ -117,9 +119,9 @@ func (svc *EchoService) Version() string {
 
 // Metadata returns the metadata of the service.
 func (svc *EchoService) Metadata() plugisservice.Metadata {
-	meta, err := plugisservice.NewServiceMetadata(svc.Prefix(), time.Now())
+	serviceMetadata, err := plugisservice.NewServiceMetadata(svc.Prefix(), time.Now())
 	if err != nil {
 		svc.Logger().Error("NewServiceMetadata", "error", err)
 	}
-	return meta
+	return serviceMetadata.Meta()
 }

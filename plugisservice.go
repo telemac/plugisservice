@@ -29,6 +29,7 @@ type PlugisIntf interface {
 	Logger() *slog.Logger
 	SetNats(*nats.Conn)
 	Nats() *nats.Conn
+	SetPrefix(prefix string)
 	Prefix() string
 	Publish(topic string, payload []byte) error
 	Request(subj string, data []byte, timeout time.Duration) (*nats.Msg, error)
@@ -43,7 +44,7 @@ type ServiceInfo struct {
 	Description string     `json:"description"`
 	Version     string     `json:"version"`
 	Type        string     `json:"type"`
-	Metadata    Metadata   `json:"metadata"`
+	Metadata    Metadata   `json:"metadata"` // contains at least ServiceMetadata fields
 	Endpoints   []Endpoint `json:"endpoints"`
 }
 

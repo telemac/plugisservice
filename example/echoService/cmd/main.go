@@ -24,7 +24,7 @@ func main() {
 	}
 	defer nc.Close()
 
-	runner := plugisservice.NewServiceRunner(nc, logger)
+	runner := plugisservice.NewServiceRunner(nc, logger, "integrator.customer.instance")
 
 	runner.Start(ctx, echoservice.NewEchoService())
 
