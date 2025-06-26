@@ -18,6 +18,7 @@ type EndpointConfig struct {
 	Metadata       map[string]string    `json:"metadata,omitempty"`
 	QueueGroup     string               `json:"queue_group,omitempty"`
 	Subject        string               `json:"subject,omitempty"`
+	UserData       any                  `json:"-"`
 }
 
 // setDefaults applies default values to endpoint configuration
@@ -90,7 +91,7 @@ type PlugisServiceReply struct {
 }
 
 // PlugisServiceHandler is the function signature for endpoint handlers
-type PlugisServiceHandler func(ctx context.Context, request micro.Request) (any, error)
+type PlugisServiceHandler func(ctx context.Context, request micro.Request, endpoint EndpointConfig) (any, error)
 
 // PlugisHandler manages concurrency and timeouts for a single endpoint
 type PlugisHandler struct {
@@ -154,7 +155,7 @@ func (ph PlugisHandler) handleWithTimeout(req micro.Request) {
 			}
 		}()
 
-		data, err := ph.plugisServiceHandler(ctx, req)
+		data, err := ph.plugisServiceHandler(ctx, req, ph.config)
 		resultChan <- result{data: data, err: err}
 	}()
 

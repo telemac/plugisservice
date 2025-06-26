@@ -2,9 +2,7 @@ package echoservice
 
 import (
 	"context"
-	"github.com/nats-io/nats.go/micro"
 	"github.com/telemac/plugisservice"
-	nats_service "github.com/telemac/plugisservice/pkg/nats-service"
 	"time"
 )
 
@@ -21,7 +19,7 @@ func NewEchoService() *EchoService {
 }
 
 // ExecuteCommand sends a command
-func (svc *EchoService) ExecuteCommand(ctx context.Context, command string) error {
+func (svc *EchoService) ExecuteCommand(ctx context.Context, command string) ([]byte, error) {
 	subject := "ism.homelab.service.plugis.command"
 
 	svc.Logger().Info("sending command",
@@ -35,7 +33,7 @@ func (svc *EchoService) ExecuteCommand(ctx context.Context, command string) erro
 			"error", err,
 			"command", command,
 		)
-		return err
+		return nil, err
 	} else {
 		svc.Logger().Info("command executed successfully",
 			"command", command,
@@ -43,7 +41,7 @@ func (svc *EchoService) ExecuteCommand(ctx context.Context, command string) erro
 		)
 	}
 
-	return nil
+	return msg.Data, nil
 }
 
 // Run is the main function of the service.
@@ -59,37 +57,14 @@ func (svc *EchoService) Run(ctx context.Context) error {
 
 	svc.ExecuteCommand(ctx, "sleep 3")
 
-	service, err := nats_service.NewNatsService(svc.Nats(), svc.Prefix(), micro.Config{
-		Name:        svc.Name(),
-		Endpoint:    nil,
-		Version:     svc.Version(),
-		Description: svc.Description(),
-		Metadata:    svc.Metadata(),
-	})
+	service, err := svc.StartService(svc)
 	if err != nil {
 		return err
 	}
 	defer func() {
 		service.Stop()
 	}()
-	/*
-		pingEndpoint := nats_service.EndpointConfig{
-			Name: "ping",
-			Handler: func(ctx context.Context, request micro.Request) (any, error) {
-				data := request.Data()
-				_ = data
-				return "ping: " + string(data), err
-			},
-			MaxConcurrency: 10,
-			RequestTimeout: 2 * time.Second,
-			Metadata: map[string]string{
-				"description": "ping",
-				"version":     "0.0.1",
-			},
-		}
-
-	*/
-
+	pingEndpoint.UserData = svc
 	err = service.AddEndpoint(ctx, pingEndpoint)
 	if err != nil {
 		return err

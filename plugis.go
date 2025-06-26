@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/nats-io/nats.go/micro"
+	nats_service "github.com/telemac/plugisservice/pkg/nats-service"
 	"iter"
 	"log/slog"
 	"os"
@@ -218,6 +220,7 @@ func NewServiceMetadata(prefix string, startedAt time.Time) (*ServiceMetadata, e
 //	return meta
 //}
 
+// Meta returns ServiceMetaData as map[string]string
 func (smd *ServiceMetadata) Meta() Metadata {
 	data, err := json.Marshal(smd)
 	if err != nil {
@@ -228,4 +231,17 @@ func (smd *ServiceMetadata) Meta() Metadata {
 		return Metadata{}
 	}
 	return meta
+}
+
+// StartService initializes and starts a NATS service for the given PlugisServiceIntf implementation.
+// It returns the created NatsService and any error encountered during the creation process.
+func (plugis *Plugis) StartService(svc PlugisServiceIntf) (*nats_service.NatsService, error) {
+	service, err := nats_service.NewNatsService(plugis.Nats(), plugis.Prefix(), micro.Config{
+		Name:        svc.Name(),
+		Endpoint:    nil,
+		Version:     svc.Version(),
+		Description: svc.Description(),
+		Metadata:    svc.Metadata(),
+	})
+	return service, err
 }

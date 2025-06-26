@@ -2,6 +2,7 @@ package plugisservice
 
 import (
 	"context"
+	nats_service "github.com/telemac/plugisservice/pkg/nats-service"
 	"iter"
 	"log/slog"
 	"time"
@@ -35,6 +36,7 @@ type PlugisIntf interface {
 	Request(subj string, data []byte, timeout time.Duration) (*nats.Msg, error)
 	RequestMany(ctx context.Context, subject string, data []byte, opts ...natsext.RequestManyOpt) (iter.Seq2[*nats.Msg, error], error)
 	GetServices(ctx context.Context) ([]ServiceInfo, error)
+	StartService(svc PlugisServiceIntf) (*nats_service.NatsService, error)
 }
 
 // ServiceInfo is the information about a service.
