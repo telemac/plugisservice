@@ -37,6 +37,8 @@ type PlugisIntf interface {
 	RequestMany(ctx context.Context, subject string, data []byte, opts ...natsext.RequestManyOpt) (iter.Seq2[*nats.Msg, error], error)
 	GetServices(ctx context.Context) ([]ServiceInfo, error)
 	StartService(svc PlugisServiceIntf) (*nats_service.NatsService, error)
+	VariableSet(name string, value any, varType string) error
+	VariableUnset(name string) error
 }
 
 // ServiceInfo is the information about a service.

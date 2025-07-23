@@ -4,13 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/nats-io/nats.go/micro"
-	nats_service "github.com/telemac/plugisservice/pkg/nats-service"
 	"iter"
 	"log/slog"
 	"os"
 	"runtime"
 	"time"
+
+	"github.com/nats-io/nats.go/micro"
+	"github.com/telemac/plugisservice/model"
+	nats_service "github.com/telemac/plugisservice/pkg/nats-service"
 
 	"github.com/telemac/goutils/net"
 	"github.com/telemac/goutils/task"
@@ -34,6 +36,11 @@ var (
 	// ErrNatsNotConnected  = errors.New("nats not connected")
 	ErrNatsConnectionNil = errors.New("nats connection is nil")
 )
+
+type Event[T any] struct {
+	Type string `json:"type,omitempty"`
+	Data T      `json:"data,omitempty"`
+}
 
 // SetLogger sets the logger for the Plugis instance.
 func (plugis *Plugis) SetLogger(log *slog.Logger) {
@@ -244,4 +251,40 @@ func (plugis *Plugis) StartService(svc PlugisServiceIntf) (*nats_service.NatsSer
 		Metadata:    svc.Metadata(),
 	})
 	return service, err
+}
+
+// VariableSet sets a variable with the given name, value, and type, then publishes it to a corresponding topic.
+func (plugis *Plugis) VariableSet(name string, value any, varType string) error {
+	variable := model.Variable{
+		Name:    name,
+		Value:   value,
+		VarType: varType,
+	}
+	event := Event[model.Variable]{
+		Type: "variable.set",
+		Data: variable,
+	}
+	topic := "variable.set." + name
+	payload, err := json.Marshal(event)
+	if err != nil {
+		return err
+	}
+	return plugis.Publish(topic, payload)
+}
+
+// VariableUnset unsets a variable with the given name, then publishes it to a corresponding topic.
+func (plugis *Plugis) VariableUnset(name string) error {
+	variable := model.Variable{
+		Name: name,
+	}
+	event := Event[model.Variable]{
+		Type: "variable.unset",
+		Data: variable,
+	}
+	topic := "variable.unset." + name
+	payload, err := json.Marshal(event)
+	if err != nil {
+		return err
+	}
+	return plugis.Publish(topic, payload)
 }
